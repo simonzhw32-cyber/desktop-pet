@@ -20,6 +20,7 @@ impl PetStateMachine {
         &self.current_state
     }
 
+    #[allow(dead_code)]
     pub fn frame_index(&self) -> usize {
         self.frame_index
     }
