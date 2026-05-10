@@ -4,7 +4,7 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem, Submenu},
     tray::{TrayIcon, TrayIconBuilder},
-    Manager, AppHandle, Runtime,
+    AppHandle, Emitter, Manager, Runtime,
 };
 
 use crate::skin_manager::SkinInfo;
@@ -34,13 +34,14 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon, Box<dyn st
                     // 弹出确认对话框
                     let app_clone = app.clone();
                     tauri::async_runtime::spawn(async move {
-                        use tauri_plugin_dialog::DialogExt;
+                        use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
                         let confirmed = app_clone
                             .dialog()
                             .message("Are you sure you want to quit Desktop Pet?")
                             .title("Quit Confirmation")
-                            .ok_button_text("Quit")
-                            .cancel_button_text("Cancel")
+                            .kind(MessageDialogKind::Warning)
+                            .ok_label("Quit")
+                            .cancel_label("Cancel")
                             .blocking_show();
                         if confirmed {
                             app_clone.exit(0);
@@ -50,10 +51,7 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon, Box<dyn st
                 id if id.starts_with("skin_") => {
                     // 切换皮肤
                     let skin_id = id.replace("skin_", "");
-                    let app_clone = app.clone();
-                    tauri::async_runtime::spawn(async move {
-                        let _ = app_clone.emit("switch_skin", skin_id);
-                    });
+                    let _ = app.emit("switch_skin", skin_id);
                 }
                 _ => {}
             }
@@ -69,7 +67,11 @@ pub fn update_skin_menu<R: Runtime>(
     skins: &[SkinInfo],
     current_skin_id: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let skin_submenu: Submenu<R> = app.menu().get("skin_submenu")?;
+    let skin_submenu: Submenu<R> = app
+        .menu()
+        .ok_or("No menu found")?
+        .get("skin_submenu")
+        .ok_or("skin_submenu not found")?;
 
     // 先移除现有菜单项
     let existing_count = skin_submenu.items().len();
