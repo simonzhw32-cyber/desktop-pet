@@ -22,8 +22,7 @@
         "decorations": false,
         "alwaysOnTop": true,
         "resizable": false,
-        "skipTaskbar": true,
-        "ignoreCursorEvents": true
+        "skipTaskbar": true
       }
     ],
     "security": {
