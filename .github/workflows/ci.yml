@@ -36,17 +36,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Cache Rust dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            src-tauri/target
-          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-v2-
-
       - name: Install system dependencies (Tauri)
         run: |
           sudo apt-get update
@@ -61,22 +50,13 @@ jobs:
       - name: Build frontend
         run: pnpm build
 
-      - name: Debug directory structure
-        run: |
-          echo "=== Project root ==="
-          ls -la
-          echo "=== src-tauri ==="
-          ls -la src-tauri/
-          echo "=== src-tauri/assets ==="
-          ls -la src-tauri/assets/ || echo "assets not found"
-          echo "=== Working directory ==="
-          pwd
-
       - name: Run Rust linter (clippy)
-        run: cd src-tauri && cargo clippy -- -D warnings
+        working-directory: src-tauri
+        run: cargo clippy -- -D warnings
 
       - name: Run Rust tests
-        run: cd src-tauri && cargo test
+        working-directory: src-tauri
+        run: cargo test
 
   build-windows:
     needs: lint-and-test
