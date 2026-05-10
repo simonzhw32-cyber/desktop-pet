@@ -16,7 +16,6 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_event::init())
         .manage(Mutex::new(PetStateMachine::new()))
         .manage(Mutex::new(PetSettings::default()))
         .invoke_handler(tauri::generate_handler![
