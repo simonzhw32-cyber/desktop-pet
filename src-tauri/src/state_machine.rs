@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 pub struct PetStateMachine {
     current_state: String,
     frame_index: usize,

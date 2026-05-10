@@ -77,9 +77,14 @@ pub fn update_skin_menu(
         .ok_or("skin_submenu not found")?;
 
     // 先移除现有菜单项
-    let existing_count = skin_submenu.items().len();
+    let existing_items = skin_submenu.items()?;
+    let existing_count = existing_items.len();
     for i in (0..existing_count).rev() {
-        skin_submenu.remove(i)?;
+        if let Some(item) = existing_items.get(i) {
+            if let Some(menu_item) = item.as_menuitem() {
+                skin_submenu.remove(menu_item)?;
+            }
+        }
     }
 
     // 添加皮肤选项
