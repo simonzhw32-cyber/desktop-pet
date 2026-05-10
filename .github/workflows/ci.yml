@@ -62,10 +62,10 @@ jobs:
         run: pnpm build
 
       - name: Run Rust linter (clippy)
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+        run: cd src-tauri && cargo clippy -- -D warnings
 
       - name: Run Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        run: cd src-tauri && cargo test
 
   build-windows:
     needs: lint-and-test
