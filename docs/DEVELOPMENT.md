@@ -12,6 +12,12 @@ pnpm lint
 # Run tests (placeholder)
 pnpm test
 
+# Rust tests
+cd src-tauri && cargo test
+
+# Rust linter
+cd src-tauri && cargo clippy
+
 # Development server with hot reload
 pnpm tauri dev
 
@@ -79,3 +85,24 @@ Edit `src-tauri/Cargo.toml` and add to `[dependencies]`.
 - Frontend: Use browser DevTools (auto-opens in dev mode)
 - Backend: Use `println!` or `log` crate for console output
 - Tauri: Check `src-tauri/` for Rust errors during build
+
+## Project Status
+
+**Current Version:** 0.1.0
+
+**Implemented Features:**
+- ✅ Tauri 2 + React + TypeScript scaffold
+- ✅ Skin loading and rendering
+- ✅ 11 required states (rich-v1)
+- ✅ State machine with frame animation
+- ✅ Mouse interaction (hover/click/drag)
+- ✅ Skin validator with format/size checks
+- ✅ Multi-skin support with settings persistence
+- ✅ System tray with context menu
+- ✅ Unit tests (13 test cases)
+- ✅ CI pipeline (lint/test/build/clippy)
+
+**Known Issues:**
+- Rust code requires local compilation (VM memory limited)
+- CSP disabled (enable before production release)
+- Path traversal check is basic (use canonicalize later)

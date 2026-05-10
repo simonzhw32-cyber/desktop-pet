@@ -1,12 +1,46 @@
 # Desktop Pet
 
-A cross-platform desktop pet application built with Tauri 2, React, and TypeScript.
+A cute desktop mascot application built with Tauri 2 and React.
 
 ## Features
 
-- 🐱 Animated desktop pet with transparent, frameless, always-on-top window
-- 🎨 Extensible skin system (see [Skin Authoring Guide](docs/skin-authoring.md))
-- 🔒 Privacy-first design (see [Security Policy](docs/SECURITY.md))
+- 🐾 **11 Animation States** - idle, walk, click, drag, sleep, wake, hover, happy, sad, surprised, wave
+- 🎨 **Customizable Skins** - Load your own skins with JSON configuration
+- 🖱️ **Interactive** - Click, drag, and hover interactions
+- 🌙 **Auto Sleep** - Pet falls asleep after 30 seconds of inactivity
+- 🔄 **Multi-Skin Support** - Switch between installed skins via system tray
+- 📐 **Skin Validator** - Automatic validation of skin format and dimensions
+- 🖼️ **System Tray** - Quick access menu for settings and skin switching
+
+## Screenshots
+
+<!-- Add screenshots here -->
+*Coming soon*
+
+## Installation
+
+Download from [Releases](../../releases) (when available).
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run in development mode
+pnpm tauri dev
+
+# Build for production
+pnpm tauri build
+```
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed guide.
+
+## Documentation
+
+- [Agent Playbook](docs/agent-playbook.md) - Multi-agent workflow
+- [Skin Authoring](docs/skin-authoring.md) - Create custom skins
+- [Development Guide](docs/DEVELOPMENT.md) - Build instructions
 
 ## Tech Stack
 
@@ -39,13 +73,6 @@ pnpm tauri dev
 # Build for production
 pnpm tauri build
 ```
-
-## Documentation
-
-- [Development Guide](docs/DEVELOPMENT.md) - Local development commands and project structure
-- [Agent Playbook](docs/agent-playbook.md) - Multi-agent collaboration workflow
-- [Skin Authoring](docs/skin-authoring.md) - Create custom pet skins
-- [Security Policy](docs/SECURITY.md) - Privacy and security guidelines
 
 ## License
 

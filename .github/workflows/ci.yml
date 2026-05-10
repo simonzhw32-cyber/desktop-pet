@@ -66,6 +66,16 @@ jobs:
       - name: Build frontend
         run: pnpm build
 
+      - name: Run Rust linter (clippy)
+        run: |
+          cd src-tauri
+          cargo clippy --no-default-features -- -D warnings
+
+      - name: Run Rust tests
+        run: |
+          cd src-tauri
+          cargo test --no-default-features 2>&1
+
       # Note: Full Tauri build requires platform-specific setup
       # Uncomment when ready for release builds
       # - name: Build Tauri application

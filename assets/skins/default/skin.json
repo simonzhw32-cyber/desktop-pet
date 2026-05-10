@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "coreProfile": "rich-v1",
+  "id": "default",
+  "name": "Default Pet",
+  "author": "desktop-pet",
+  "canvas": {
+    "width": 512,
+    "height": 512
+  },
+  "anchor": {
+    "x": 256,
+    "y": 512
+  },
+  "states": {
+    "idle": {
+      "frames": ["frames/idle_001.png"],
+      "fps": 1,
+      "loopType": "loop"
+    },
+    "walk": {
+      "frames": ["frames/walk_001.png"],
+      "fps": 1,
+      "loopType": "loop"
+    },
+    "click": {
+      "frames": ["frames/click_001.png"],
+      "fps": 1,
+      "loopType": "oneshot"
+    },
+    "drag": {
+      "frames": ["frames/drag_001.png"],
+      "fps": 1,
+      "loopType": "loop"
+    },
+    "sleep": {
+      "frames": ["frames/sleep_001.png"],
+      "fps": 1,
+      "loopType": "loop"
+    },
+    "wake": {
+      "frames": ["frames/wake_001.png"],
+      "fps": 1,
+      "loopType": "oneshot"
+    },
+    "hover": {
+      "frames": ["frames/hover_001.png"],
+      "fps": 1,
+      "loopType": "loop"
+    },
+    "happy": {
+      "frames": ["frames/happy_001.png"],
+      "fps": 1,
+      "loopType": "oneshot"
+    },
+    "sad": {
+      "frames": ["frames/sad_001.png"],
+      "fps": 1,
+      "loopType": "oneshot"
+    },
+    "surprised": {
+      "frames": ["frames/surprised_001.png"],
+      "fps": 1,
+      "loopType": "oneshot"
+    },
+    "wave": {
+      "frames": ["frames/wave_001.png"],
+      "fps": 1,
+      "loopType": "oneshot"
+    }
+  }
+}
