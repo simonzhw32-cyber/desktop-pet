@@ -22,11 +22,10 @@ pub fn setup_tray(app: &tauri::AppHandle) -> Result<TrayIcon, Box<dyn std::error
     let rgba = img.to_rgba8();
     let icon = Image::new_owned(rgba.to_vec(), rgba.width(), rgba.height());
 
-    let app_clone = app.clone();
     let tray = TrayIconBuilder::new()
         .icon(icon)
         .menu(&menu)
-        .on_menu_event(move |app, event| {
+        .on_menu_event(|app, event| {
             match event.id.as_ref() {
                 "show_hide" => {
                     if let Some(window) = app.get_webview_window("main") {
@@ -40,14 +39,13 @@ pub fn setup_tray(app: &tauri::AppHandle) -> Result<TrayIcon, Box<dyn std::error
                 "quit" => {
                     let app_clone = app.clone();
                     tauri::async_runtime::spawn(async move {
-                        use tauri_plugin_dialog::DialogExt;
+                        use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
                         let confirmed = app_clone
                             .dialog()
                             .message("Are you sure you want to quit Desktop Pet?")
                             .title("Quit Confirmation")
-                            .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
-                            .ok_button_label("Quit")
-                            .cancel_button_label("Cancel")
+                            .kind(MessageDialogKind::Warning)
+                            .buttons(MessageDialogButtons::OkCancel)
                             .blocking_show();
                         if confirmed {
                             app_clone.exit(0);
@@ -56,18 +54,12 @@ pub fn setup_tray(app: &tauri::AppHandle) -> Result<TrayIcon, Box<dyn std::error
                 }
                 id if id.starts_with("skin_") => {
                     let skin_id = id.replace("skin_", "");
-                    let app_clone = app.clone();
-                    tauri::async_runtime::spawn(async move {
-                        let _ = app_clone.emit("switch_skin", skin_id);
-                    });
+                    let _ = app.emit("switch_skin", skin_id);
                 }
                 _ => {}
             }
         })
         .build(app)?;
-
-    // Keep tray alive
-    Box::leak(Box::new(app_clone));
 
     Ok(tray)
 }
