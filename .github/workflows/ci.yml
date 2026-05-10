@@ -9,6 +9,8 @@ on:
 
 jobs:
   lint-and-test:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
@@ -59,6 +61,8 @@ jobs:
         run: cargo test
 
   build-windows:
+    permissions:
+      contents: write
     needs: lint-and-test
     runs-on: windows-latest
 
