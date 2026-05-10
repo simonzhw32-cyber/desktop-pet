@@ -4,12 +4,12 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem, Submenu},
     tray::{TrayIcon, TrayIconBuilder},
-    Manager, Runtime,
+    Emitter, Manager,
 };
 
 use crate::skin_manager::SkinInfo;
 
-pub fn setup_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon, Box<dyn std::error::Error>> {
+pub fn setup_tray(app: &tauri::AppHandle) -> Result<TrayIcon, Box<dyn std::error::Error>> {
     let show_hide = MenuItem::with_id(app, "show_hide", "Show/Hide", true, None::<&str>)?;
     let skin_submenu = Submenu::with_id(app, "skin_submenu", "Switch Skin", true)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -22,10 +22,11 @@ pub fn setup_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon, Box
     let rgba = img.to_rgba8();
     let icon = Image::new_owned(rgba.to_vec(), rgba.width(), rgba.height());
 
+    let app_clone = app.clone();
     let tray = TrayIconBuilder::new()
         .icon(icon)
         .menu(&menu)
-        .on_menu_event(|app, event| {
+        .on_menu_event(move |app, event| {
             match event.id.as_ref() {
                 "show_hide" => {
                     if let Some(window) = app.get_webview_window("main") {
@@ -45,10 +46,8 @@ pub fn setup_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon, Box
                             .message("Are you sure you want to quit Desktop Pet?")
                             .title("Quit Confirmation")
                             .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
-                            .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancel(
-                                "Quit".into(),
-                                "Cancel".into(),
-                            ))
+                            .ok_button_label("Quit")
+                            .cancel_button_label("Cancel")
                             .blocking_show();
                         if confirmed {
                             app_clone.exit(0);
@@ -59,7 +58,6 @@ pub fn setup_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon, Box
                     let skin_id = id.replace("skin_", "");
                     let app_clone = app.clone();
                     tauri::async_runtime::spawn(async move {
-                        use tauri::Emitter;
                         let _ = app_clone.emit("switch_skin", skin_id);
                     });
                 }
@@ -68,18 +66,22 @@ pub fn setup_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon, Box
         })
         .build(app)?;
 
+    // Keep tray alive
+    Box::leak(Box::new(app_clone));
+
     Ok(tray)
 }
 
 /// 更新皮肤子菜单内容（先清空再填充）
-pub fn update_skin_menu<R: Runtime>(
-    app: &tauri::AppHandle<R>,
+pub fn update_skin_menu(
+    app: &tauri::AppHandle,
     skins: &[SkinInfo],
     current_skin_id: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let menu = app.menu();
-    let skin_submenu: Submenu<R> = menu
+    let menu = app.menu().ok_or("menu not found")?;
+    let skin_submenu: Submenu<tauri::Wry> = menu
         .get("skin_submenu")
+        .and_then(|kind| kind.as_submenu().cloned())
         .ok_or("skin_submenu not found")?;
 
     // 先移除现有菜单项
@@ -104,8 +106,8 @@ pub fn update_skin_menu<R: Runtime>(
 }
 
 /// 获取皮肤列表并更新菜单
-pub fn refresh_skin_menu<R: Runtime>(
-    app: &tauri::AppHandle<R>,
+pub fn refresh_skin_menu(
+    app: &tauri::AppHandle,
 ) -> Result<(), Box<dyn std::error::Error>> {
     use crate::skin_manager::list_skins;
 
