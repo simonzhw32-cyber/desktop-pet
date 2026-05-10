@@ -16,6 +16,7 @@
     "core:menu:allow-set-accelerator",
     "opener:default",
     "dialog:default",
-    "event:default"
+    "core:event:default",
+    "core:image:allow-from-bytes"
   ]
 }
