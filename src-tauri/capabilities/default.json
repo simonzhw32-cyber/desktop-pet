@@ -5,6 +5,9 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:event:default",
+    "core:event:allow-emit",
+    "core:image:allow-from-bytes",
     "core:tray:default",
     "core:tray:allow-new",
     "core:tray:allow-set-icon",
@@ -14,9 +17,8 @@
     "core:menu:allow-append",
     "core:menu:allow-prepend",
     "core:menu:allow-set-accelerator",
+    "core:menu:allow-get",
     "opener:default",
-    "dialog:default",
-    "core:event:default",
-    "core:image:allow-from-bytes"
+    "dialog:default"
   ]
 }
