@@ -4,20 +4,26 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem, Submenu},
     tray::{TrayIcon, TrayIconBuilder},
-    AppHandle, Emitter, Manager, Runtime,
+    Manager, Runtime,
 };
 
 use crate::skin_manager::SkinInfo;
 
-pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon, Box<dyn std::error::Error>> {
+pub fn setup_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon, Box<dyn std::error::Error>> {
     let show_hide = MenuItem::with_id(app, "show_hide", "Show/Hide", true, None::<&str>)?;
     let skin_submenu = Submenu::with_id(app, "skin_submenu", "Switch Skin", true)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
 
     let menu = Menu::with_items(app, &[&show_hide, &skin_submenu, &quit])?;
 
+    // Decode icon PNG and create Image
+    let icon_bytes = include_bytes!("../icons/icon.png");
+    let img = image::load_from_memory(icon_bytes)?;
+    let rgba = img.to_rgba8();
+    let icon = Image::new_owned(rgba.to_vec(), rgba.width(), rgba.height());
+
     let tray = TrayIconBuilder::new()
-        .icon(Image::from_bytes(include_bytes!("../icons/icon.png")).unwrap())
+        .icon(icon)
         .menu(&menu)
         .on_menu_event(|app, event| {
             match event.id.as_ref() {
@@ -31,17 +37,18 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon, Box<dyn st
                     }
                 }
                 "quit" => {
-                    // 弹出确认对话框
                     let app_clone = app.clone();
                     tauri::async_runtime::spawn(async move {
-                        use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                        use tauri_plugin_dialog::DialogExt;
                         let confirmed = app_clone
                             .dialog()
                             .message("Are you sure you want to quit Desktop Pet?")
                             .title("Quit Confirmation")
-                            .kind(MessageDialogKind::Warning)
-                            .ok_label("Quit")
-                            .cancel_label("Cancel")
+                            .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
+                            .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancel(
+                                "Quit".into(),
+                                "Cancel".into(),
+                            ))
                             .blocking_show();
                         if confirmed {
                             app_clone.exit(0);
@@ -49,9 +56,12 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon, Box<dyn st
                     });
                 }
                 id if id.starts_with("skin_") => {
-                    // 切换皮肤
                     let skin_id = id.replace("skin_", "");
-                    let _ = app.emit("switch_skin", skin_id);
+                    let app_clone = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        use tauri::Emitter;
+                        let _ = app_clone.emit("switch_skin", skin_id);
+                    });
                 }
                 _ => {}
             }
@@ -63,13 +73,12 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon, Box<dyn st
 
 /// 更新皮肤子菜单内容（先清空再填充）
 pub fn update_skin_menu<R: Runtime>(
-    app: &AppHandle<R>,
+    app: &tauri::AppHandle<R>,
     skins: &[SkinInfo],
     current_skin_id: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let skin_submenu: Submenu<R> = app
-        .menu()
-        .ok_or("No menu found")?
+    let menu = app.menu();
+    let skin_submenu: Submenu<R> = menu
         .get("skin_submenu")
         .ok_or("skin_submenu not found")?;
 
@@ -96,13 +105,12 @@ pub fn update_skin_menu<R: Runtime>(
 
 /// 获取皮肤列表并更新菜单
 pub fn refresh_skin_menu<R: Runtime>(
-    app: &AppHandle<R>,
+    app: &tauri::AppHandle<R>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     use crate::skin_manager::list_skins;
 
     let skins = list_skins(std::path::Path::new("assets/skins"));
 
-    // 从设置中获取当前皮肤
     let current_skin_id = app
         .state::<Mutex<crate::skin_manager::PetSettings>>()
         .lock()
