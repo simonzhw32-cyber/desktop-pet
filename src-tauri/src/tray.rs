@@ -108,7 +108,9 @@ pub fn refresh_skin_menu(
 ) -> Result<(), Box<dyn std::error::Error>> {
     use crate::skin_manager::list_skins;
 
-    let skins = list_skins(std::path::Path::new("assets/skins"));
+    // 修复：使用 resource_dir 而不是相对路径（打包后相对路径无效）
+    let resource_path = app.path().resource_dir()?;
+    let skins = list_skins(&resource_path.join("assets/skins"));
 
     let current_skin_id = app
         .state::<Mutex<crate::skin_manager::PetSettings>>()
