@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.1.2)'
+        required: true
+        type: string
 
 jobs:
   lint-and-test:
@@ -64,6 +69,7 @@ jobs:
     permissions:
       contents: write
     needs: lint-and-test
+    if: github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
 
     steps:
@@ -98,8 +104,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v0.1.1
-          releaseName: 'Desktop Pet v0.1.1'
-          releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: false
+          tagName: v${{ github.event.inputs.version }}
+          releaseName: 'Desktop Pet v${{ github.event.inputs.version }}'
+          releaseBody: 'Auto-built release.'
+          releaseDraft: true
           prerelease: false
